@@ -1,30 +1,33 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:recipe_book_app/main.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  testWidgets('user can view recipe list and favorite a recipe', (tester) async {
+    await tester.pumpWidget(const RecipeBookApp());
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    // Home screen renders title and at least one recipe.
+    expect(find.text('My Recipe Book'), findsOneWidget);
+    expect(find.text('Garlic Butter Shrimp'), findsOneWidget);
+    expect(find.widgetWithIcon(ListTile, Icons.favorite_border), findsWidgets);
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+    // Navigate to the details page for the first recipe.
+    await tester.tap(find.text('Garlic Butter Shrimp'));
+    await tester.pumpAndSettle();
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    // Details page shows sections and favorite action.
+    expect(find.text('Ingredients'), findsOneWidget);
+    expect(find.text('Instructions'), findsOneWidget);
+    expect(find.text('Favorite'), findsOneWidget);
+
+    // Favorite the recipe and return to the home screen.
+    await tester.tap(find.text('Favorite'));
+    await tester.pumpAndSettle();
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+
+    // The recipe now appears as favorited on the home list.
+    expect(find.widgetWithIcon(ListTile, Icons.favorite), findsWidgets);
   });
 }
